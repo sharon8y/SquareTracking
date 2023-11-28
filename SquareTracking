@@ -1,0 +1,52 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+
+# Creating a 250x250 grayscale matrix with zeros
+matrix_size = 250
+matrix = np.zeros((matrix_size, matrix_size))
+
+# Creating a 50x50 square in the middle of the matrix with values 100
+square_size = 50
+start = (matrix_size - square_size) // 2
+end = start + square_size
+matrix[start:end, start:end] = 100
+
+# Plotting the middle row of the matrix
+middle_row = matrix[matrix_size // 2, :]
+
+plt.figure(figsize=(8, 4))
+plt.plot(middle_row, color='black')
+plt.title('Middle Row of the Matrix')
+plt.xlabel('Column')
+plt.ylabel('Value')
+plt.show()
+
+# Creating a video of the square moving diagonally
+fig, ax = plt.subplots()
+im = ax.imshow(matrix, cmap='gray')
+frame_text = ax.text(10, 10, '', bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 5})
+
+def update(frame):
+    ax.clear()
+    x_offset = int(frame / matrix_size * (matrix_size - square_size))
+    y_offset = int(frame / matrix_size * (matrix_size - square_size))
+    matrix_copy = matrix.copy()
+    matrix_copy[y_offset:y_offset + square_size, x_offset:x_offset + square_size] = 100
+    im = ax.imshow(matrix_copy, cmap='gray')
+    
+    center_x = x_offset + square_size // 2
+    center_y = y_offset + square_size // 2
+    frame_text.set_text(f'Center: ({center_x}, {center_y})')
+
+    # Creating a red frame around the moving square
+    rect = plt.Rectangle((x_offset, y_offset), square_size, square_size, edgecolor='red', linewidth=2, fill=False)
+    ax.add_patch(rect)
+
+    return frame_text, rect
+
+ani = FuncAnimation(fig, update, frames=matrix_size, interval=50, blit=True)
+
+# Displaying the video in Colab
+from IPython.display import HTML
+HTML(ani.to_jshtml())
